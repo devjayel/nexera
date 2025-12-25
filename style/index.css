@@ -1,0 +1,462 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.main-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100vh;
+    width: 100%;
+}
+
+/* Left Column - Database List */
+.database-section {
+    background-color: var(--bg-light);
+    padding: 40px;
+    overflow-y: auto;
+    border-right: 1px solid var(--border-color);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-light);
+    padding: 10px 0;
+    z-index: 10;
+}
+
+.section-header h3 {
+    font-size: 28px;
+    color: var(--text-dark);
+    font-weight: 700;
+}
+
+.btn-create {
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
+/* Right Column - Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: white;
+    overflow-y: auto;
+}
+
+.hero-content {
+    text-align: center;
+    max-width: 600px;
+}
+
+.logo-large {
+    margin: 0 auto 30px;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+}
+
+.logo-large svg {
+    width: 70px;
+    height: 70px;
+    color: white;
+}
+
+.hero-content h1 {
+    font-size: 56px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+}
+
+.hero-content h2 {
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 20px;
+    opacity: 0.9;
+}
+
+.hero-content > p {
+    font-size: 16px;
+    line-height: 1.6;
+    opacity: 0.85;
+    margin-bottom: 40px;
+}
+
+.hero-features {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 50px;
+    flex-wrap: wrap;
+}
+
+.feature-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.feature-item svg {
+    width: 40px;
+    height: 40px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.feature-item span {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.hero-footer {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.footer-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    font-weight: 500;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.footer-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.footer-link svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Database Grid */
+.database-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.database-card {
+    background: white;
+    padding: 0;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid transparent;
+}
+
+.database-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateX(4px);
+    border-color: var(--primary-color);
+}
+
+.database-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+}
+
+.database-card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px 20px 15px 30px;
+}
+
+.database-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 8px rgba(59, 151, 151, 0.2);
+}
+
+.database-icon svg {
+    width: 28px;
+    height: 28px;
+    color: white;
+}
+
+.database-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.database-card h4 {
+    color: var(--text-dark);
+    font-size: 18px;
+    margin-bottom: 4px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.database-badge {
+    background: var(--primary-color);
+    color: white;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.database-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: #999;
+    margin-top: 4px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.meta-item svg {
+    width: 14px;
+    height: 14px;
+}
+
+.database-card-body {
+    padding: 0 20px 15px 30px;
+}
+
+.database-card p {
+    color: #666;
+    margin-bottom: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 40px;
+}
+
+.database-card-footer {
+    background: var(--bg-light);
+    padding: 15px 20px 15px 30px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.database-card-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-small {
+    padding: 10px 16px;
+    font-size: 13px;
+    border-radius: 6px;
+    flex: 1;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-small svg {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-edit {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-delete {
+    background-color: transparent;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+}
+
+.btn-delete:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-open {
+    background-color: #28a745;
+    color: white;
+    flex: 2;
+}
+
+.btn-open:hover {
+    background-color: #218838;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: #999;
+}
+
+.empty-state-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px;
+    opacity: 0.15;
+}
+
+.empty-state svg {
+    width: 55px;
+    height: 55px;
+    color: white;
+}
+
+.empty-state h3 {
+    font-size: 22px;
+    margin-bottom: 10px;
+    color: var(--text-dark);
+}
+
+.empty-state p {
+    font-size: 15px;
+    color: #999;
+    margin-bottom: 20px;
+}
+
+.empty-state-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.empty-state-hint svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Delete Modal Styles */
+.modal-small {
+    max-width: 400px;
+}
+
+.modal-body {
+    padding: 20px 0;
+}
+
+.modal-body p {
+    color: var(--text-dark);
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.modal-body strong {
+    color: var(--primary-color);
+}
+
+.warning-text {
+    color: #dc3545;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .main-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+
+    .hero-section {
+        padding: 30px 20px;
+        min-height: auto;
+    }
+
+    .hero-content h1 {
+        font-size: 40px;
+    }
+
+    .hero-content h2 {
+        font-size: 20px;
+    }
+
+    .database-section {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+}
+
+@media (max-width: 768px) {
+    .database-section {
+        padding: 20px;
+    }
+
+    .section-header h3 {
+        font-size: 22px;
+    }
+
+    .hero-content h1 {
+        font-size: 32px;
+    }
+
+    .hero-features {
+        gap: 20px;
+    }
+
+    .hero-footer {
+        flex-direction: column;
+        gap: 15px;
+    }
+}

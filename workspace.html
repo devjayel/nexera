@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexera | Workspace</title>
+    <link rel="stylesheet" href="./style/default.css">
+    <link rel="stylesheet" href="./style/workspace.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="workspace-header">
+        <div class="header-left">
+            <a href="index.html" class="back-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+            </a>
+            <div class="database-info">
+                <h1 id="databaseName">Loading...</h1>
+                <span id="databaseMeta" class="meta-text">0 tables</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn-toolbar" onclick="saveWorkspace()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+                <span>Save</span>
+            </button>
+            <button class="btn-toolbar" onclick="exportDiagram()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Export</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="workspace-container">
+        <!-- Toolbar -->
+        <aside class="toolbar">
+            <div class="toolbar-section">
+                <h3>Tools</h3>
+                <button class="tool-btn active" onclick="setTool('select')" title="Select">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                    </svg>
+                    <span>Select</span>
+                </button>
+                <button class="tool-btn" onclick="addTable()" title="Add Table">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Add Table</span>
+                </button>
+            </div>
+            <div class="toolbar-section">
+                <h3>View</h3>
+                <button class="tool-btn" onclick="zoomIn()" title="Zoom In">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                    </svg>
+                    <span>Zoom In</span>
+                </button>
+                <button class="tool-btn" onclick="zoomOut()" title="Zoom Out">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+                    </svg>
+                    <span>Zoom Out</span>
+                </button>
+                <button class="tool-btn" onclick="resetView()" title="Reset View">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>Reset</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Canvas -->
+        <div class="canvas-container">
+            <div id="canvas" class="canvas">
+                <!-- Tables and connections will be added here dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Table Modal -->
+    <div id="tableModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="tableModalTitle">Add New Table</h2>
+                <button class="close-btn" onclick="closeTableModal()">&times;</button>
+            </div>
+            <form id="tableForm" onsubmit="saveTable(event)">
+                <div class="form-group">
+                    <label for="tableName">Table Name *</label>
+                    <input type="text" id="tableName" required placeholder="e.g., Users">
+                </div>
+                <div class="form-group">
+                    <label>Columns</label>
+                    <div id="columnsContainer">
+                        <!-- Columns will be added here -->
+                    </div>
+                    <button type="button" class="btn-secondary" onclick="addColumn()">+ Add Column</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeTableModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Table</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Utility Modal for Alerts/Confirms -->
+    <div id="utilityModal" class="modal">
+        <div class="modal-content modal-utility">
+            <div class="modal-header">
+                <h2 id="utilityModalTitle">Alert</h2>
+                <button class="close-btn" onclick="ModalUtility.close()">&times;</button>
+            </div>
+            <div id="utilityModalBody" class="modal-body"></div>
+            <div class="modal-footer" id="utilityModalFooter">
+                <button class="btn-primary" onclick="ModalUtility.close()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Relationship Modal -->
+    <div id="relationshipModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create Relationship</h2>
+                <button class="close-btn" onclick="closeRelationshipModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="relationship-form">
+                    <div class="form-group">
+                        <label>From Table:</label>
+                        <strong id="fromTableName"></strong>
+                    </div>
+                    <div class="form-group">
+                        <label>To Table:</label>
+                        <select id="toTableSelect" class="form-select" required>
+                            <option value="">Select a table...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Relationship Type:</label>
+                        <div class="relationship-types">
+                            <label class="relationship-type-option">
+                                <input type="radio" name="relType" value="1:1" checked>
+                                <span class="rel-icon">
+                                    <svg width="30" height="20" viewBox="0 0 30 20">
+                                        <line x1="5" y1="10" x2="25" y2="10" stroke="#3B9797" stroke-width="2" stroke-dasharray="3,3"/>
+                                        <circle cx="5" cy="10" r="3" fill="#3B9797"/>
+                                        <circle cx="25" cy="10" r="3" fill="#3B9797"/>
+                                    </svg>
+                                </span>
+                                <span>One-to-One (1:1)</span>
+                            </label>
+                            <label class="relationship-type-option">
+                                <input type="radio" name="relType" value="1:N">
+                                <span class="rel-icon">
+                                    <svg width="30" height="20" viewBox="0 0 30 20">
+                                        <line x1="5" y1="10" x2="25" y2="10" stroke="#3B9797" stroke-width="2" stroke-dasharray="3,3"/>
+                                        <circle cx="5" cy="10" r="3" fill="#3B9797"/>
+                                        <path d="M 22,7 L 28,10 L 22,13 Z" fill="#3B9797"/>
+                                    </svg>
+                                </span>
+                                <span>One-to-Many (1:N)</span>
+                            </label>
+                            <label class="relationship-type-option">
+                                <input type="radio" name="relType" value="N:1">
+                                <span class="rel-icon">
+                                    <svg width="30" height="20" viewBox="0 0 30 20">
+                                        <line x1="5" y1="10" x2="25" y2="10" stroke="#3B9797" stroke-width="2" stroke-dasharray="3,3"/>
+                                        <path d="M 8,7 L 2,10 L 8,13 Z" fill="#3B9797"/>
+                                        <circle cx="25" cy="10" r="3" fill="#3B9797"/>
+                                    </svg>
+                                </span>
+                                <span>Many-to-One (N:1)</span>
+                            </label>
+                            <label class="relationship-type-option">
+                                <input type="radio" name="relType" value="M:N">
+                                <span class="rel-icon">
+                                    <svg width="30" height="20" viewBox="0 0 30 20">
+                                        <line x1="5" y1="10" x2="25" y2="10" stroke="#3B9797" stroke-width="2" stroke-dasharray="3,3"/>
+                                        <path d="M 8,7 L 2,10 L 8,13 Z" fill="#3B9797"/>
+                                        <path d="M 22,7 L 28,10 L 22,13 Z" fill="#3B9797"/>
+                                    </svg>
+                                </span>
+                                <span>Many-to-Many (M:N)</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Line Color:</label>
+                        <input type="color" id="relationshipColor" value="#3B9797">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeRelationshipModal()">Cancel</button>
+                <button class="btn-primary" onclick="createRelationshipFromModal()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./script/workspace.js"></script>
+</body>
+</html>
