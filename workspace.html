@@ -6,6 +6,7 @@
     <title>Nexera | Workspace</title>
     <link rel="stylesheet" href="./style/default.css">
     <link rel="stylesheet" href="./style/workspace.css">
+    <link rel="stylesheet" href="./style/relationships.css">
 </head>
 <body>
     <!-- Header -->
@@ -43,39 +44,69 @@
         <aside class="toolbar">
             <div class="toolbar-section">
                 <h3>Tools</h3>
-                <button class="tool-btn active" onclick="setTool('select')" title="Select">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-                    </svg>
-                    <span>Select</span>
-                </button>
-                <button class="tool-btn" onclick="addTable()" title="Add Table">
+
+                <button class="tool-btn active" onclick="addTable()" title="Add Table">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
                     <span>Add Table</span>
                 </button>
+                <button class="tool-btn" onclick="addMemo()" title="Add Memo">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span>Add Memo</span>
+                </button>
             </div>
             <div class="toolbar-section">
-                <h3>View</h3>
-                <button class="tool-btn" onclick="zoomIn()" title="Zoom In">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                    </svg>
-                    <span>Zoom In</span>
-                </button>
-                <button class="tool-btn" onclick="zoomOut()" title="Zoom Out">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
-                    </svg>
-                    <span>Zoom Out</span>
-                </button>
-                <button class="tool-btn" onclick="resetView()" title="Reset View">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    <span>Reset</span>
-                </button>
+                <div class="tab-navigation">
+                    <button class="tab-btn active" onclick="switchTab('tables')" data-tab="tables">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <span>Tables</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('view')" data-tab="view">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <span>View</span>
+                    </button>
+                </div>
+                <div class="tab-panels">
+                    <div class="tab-panel active" id="tablesPanel">
+                        <div id="tablesList" class="tables-list">
+                            <!-- Tables will be listed here dynamically -->
+                        </div>
+                    </div>
+                    <div class="tab-panel" id="viewPanel">
+                        <button class="tool-btn active" id="minimapToggleBtn" onclick="toggleMinimap()" title="Toggle Minimap">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                            </svg>
+                            <span>Minimap</span>
+                        </button>
+                        <button class="tool-btn active" id="tablesToggleBtn" onclick="toggleTablesVisibility()" title="Toggle Tables">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <span>Tables</span>
+                        </button>
+                        <button class="tool-btn active" id="relationshipsToggleBtn" onclick="toggleRelationshipsVisibility()" title="Toggle Relationships">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                            <span>Relationships</span>
+                        </button>
+                        <button class="tool-btn" onclick="resetView()" title="Reset View">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span>Reset</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </aside>
 
@@ -83,6 +114,115 @@
         <div class="canvas-container">
             <div id="canvas" class="canvas">
                 <!-- Tables and connections will be added here dynamically -->
+            </div>
+            
+            <!-- Minimap -->
+            <div id="minimap" class="minimap">
+                <canvas id="minimapCanvas"></canvas>
+                <div id="minimapViewport" class="minimap-viewport"></div>
+            </div>
+            
+            <!-- Draggable Relationship Panel -->
+            <div id="relationshipPanel" class="relationship-panel">
+                <div class="relationship-panel-header" id="panelHeader">
+                    <h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                        <span id="panelTitle">Create Relationship</span>
+                    </h3>
+                    <button class="panel-close-btn" onclick="closeRelationshipPanel()">&times;</button>
+                </div>
+                <div class="relationship-panel-body">
+                    <form class="relationship-panel-form" id="relationshipPanelForm" onsubmit="handleRelationshipSubmit(event)">
+                        <div class="panel-form-group">
+                            <label>From Table</label>
+                            <strong id="panelFromTableName">-</strong>
+                        </div>
+                        <div class="panel-form-group">
+                            <label>To Table</label>
+                            <select id="panelToTableSelect" class="panel-select" required>
+                                <option value="">Select a table...</option>
+                            </select>
+                        </div>
+                        <div class="panel-form-group">
+                            <label>Relationship Type</label>
+                            <div class="relationship-types-grid">
+                                <label class="rel-type-card" onclick="selectRelType(this, '1:1')">
+                                    <input type="radio" name="panelRelType" value="1:1" checked>
+                                    <div class="rel-type-icon">
+                                        <svg width="40" height="26" viewBox="0 0 40 26">
+                                            <line x1="8" y1="13" x2="32" y2="13" stroke="#3B9797" stroke-width="2" stroke-dasharray="4,4"/>
+                                            <circle cx="8" cy="13" r="4" fill="#3B9797"/>
+                                            <circle cx="32" cy="13" r="4" fill="#3B9797"/>
+                                        </svg>
+                                    </div>
+                                    <span class="rel-type-label">One-to-One</span>
+                                </label>
+                                <label class="rel-type-card" onclick="selectRelType(this, '1:N')">
+                                    <input type="radio" name="panelRelType" value="1:N">
+                                    <div class="rel-type-icon">
+                                        <svg width="40" height="26" viewBox="0 0 40 26">
+                                            <line x1="8" y1="13" x2="32" y2="13" stroke="#3B9797" stroke-width="2" stroke-dasharray="4,4"/>
+                                            <circle cx="8" cy="13" r="4" fill="#3B9797"/>
+                                            <path d="M 28,9 L 36,13 L 28,17 Z" fill="#3B9797"/>
+                                        </svg>
+                                    </div>
+                                    <span class="rel-type-label">One-to-Many</span>
+                                </label>
+                                <label class="rel-type-card" onclick="selectRelType(this, 'N:1')">
+                                    <input type="radio" name="panelRelType" value="N:1">
+                                    <div class="rel-type-icon">
+                                        <svg width="40" height="26" viewBox="0 0 40 26">
+                                            <line x1="8" y1="13" x2="32" y2="13" stroke="#3B9797" stroke-width="2" stroke-dasharray="4,4"/>
+                                            <path d="M 12,9 L 4,13 L 12,17 Z" fill="#3B9797"/>
+                                            <circle cx="32" cy="13" r="4" fill="#3B9797"/>
+                                        </svg>
+                                    </div>
+                                    <span class="rel-type-label">Many-to-One</span>
+                                </label>
+                                <label class="rel-type-card" onclick="selectRelType(this, 'M:N')">
+                                    <input type="radio" name="panelRelType" value="M:N">
+                                    <div class="rel-type-icon">
+                                        <svg width="40" height="26" viewBox="0 0 40 26">
+                                            <line x1="8" y1="13" x2="32" y2="13" stroke="#3B9797" stroke-width="2" stroke-dasharray="4,4"/>
+                                            <path d="M 12,9 L 4,13 L 12,17 Z" fill="#3B9797"/>
+                                            <path d="M 28,9 L 36,13 L 28,17 Z" fill="#3B9797"/>
+                                        </svg>
+                                    </div>
+                                    <span class="rel-type-label">Many-to-Many</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="panel-form-group">
+                            <label>Line Color</label>
+                            <div class="color-picker-group">
+                                <button type="button" class="custom-color-trigger" id="colorPickerTrigger" onclick="openCustomColorPicker(event)">
+                                    <span class="color-preview" id="colorPreview" style="background: #3B9797;"></span>
+                                    <span class="color-text" id="colorDisplay">#3B9797</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+                                <input type="hidden" id="panelRelationshipColor" value="#3B9797">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="relationship-panel-footer">
+                    <button type="button" class="panel-btn panel-btn-secondary" onclick="closeRelationshipPanel()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Cancel
+                    </button>
+                    <button type="button" class="panel-btn panel-btn-primary" onclick="handleRelationshipSubmit(event)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span id="panelSubmitText">Create</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -98,13 +238,6 @@
                 <div class="form-group">
                     <label for="tableName">Table Name *</label>
                     <input type="text" id="tableName" required placeholder="e.g., Users">
-                </div>
-                <div class="form-group">
-                    <label>Columns</label>
-                    <div id="columnsContainer">
-                        <!-- Columns will be added here -->
-                    </div>
-                    <button type="button" class="btn-secondary" onclick="addColumn()">+ Add Column</button>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-secondary" onclick="closeTableModal()">Cancel</button>
@@ -198,13 +331,113 @@
                     </div>
                     <div class="form-group">
                         <label>Line Color:</label>
-                        <input type="color" id="relationshipColor" value="#3B9797">
+                        <button class="custom-color-trigger" id="modalColorTrigger" onclick="openModalColorPicker(event)">
+                            <div class="color-preview" style="background: #3B9797;"></div>
+                            <span class="color-text">#3B9797</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeRelationshipModal()">Cancel</button>
                 <button class="btn-primary" onclick="createRelationshipFromModal()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Color Picker Dialog -->
+    <div id="customColorPicker" class="custom-color-picker" style="display: none;">
+        <div class="color-picker-header">
+            <span>Select Color</span>
+            <button type="button" class="color-picker-close" onclick="closeCustomColorPicker()">&times;</button>
+        </div>
+        <div class="color-picker-body">
+            <div class="color-preset-grid">
+                <button type="button" class="color-preset" style="background: #3B9797;" onclick="selectPresetColor('#3B9797')"></button>
+                <button type="button" class="color-preset" style="background: #FF6B6B;" onclick="selectPresetColor('#FF6B6B')"></button>
+                <button type="button" class="color-preset" style="background: #4ECDC4;" onclick="selectPresetColor('#4ECDC4')"></button>
+                <button type="button" class="color-preset" style="background: #FFE66D;" onclick="selectPresetColor('#FFE66D')"></button>
+                <button type="button" class="color-preset" style="background: #A8E6CF;" onclick="selectPresetColor('#A8E6CF')"></button>
+                <button type="button" class="color-preset" style="background: #FF8B94;" onclick="selectPresetColor('#FF8B94')"></button>
+                <button type="button" class="color-preset" style="background: #C7CEEA;" onclick="selectPresetColor('#C7CEEA')"></button>
+                <button type="button" class="color-preset" style="background: #B4A7D6;" onclick="selectPresetColor('#B4A7D6')"></button>
+                <button type="button" class="color-preset" style="background: #95E1D3;" onclick="selectPresetColor('#95E1D3')"></button>
+                <button type="button" class="color-preset" style="background: #F38181;" onclick="selectPresetColor('#F38181')"></button>
+                <button type="button" class="color-preset" style="background: #AA96DA;" onclick="selectPresetColor('#AA96DA')"></button>
+                <button type="button" class="color-preset" style="background: #FCBAD3;" onclick="selectPresetColor('#FCBAD3')"></button>
+                <button type="button" class="color-preset" style="background: #A8D8EA;" onclick="selectPresetColor('#A8D8EA')"></button>
+                <button type="button" class="color-preset" style="background: #FFA07A;" onclick="selectPresetColor('#FFA07A')"></button>
+                <button type="button" class="color-preset" style="background: #98D8C8;" onclick="selectPresetColor('#98D8C8')"></button>
+                <button type="button" class="color-preset" style="background: #6C5CE7;" onclick="selectPresetColor('#6C5CE7')"></button>
+            </div>
+            <div class="color-input-section">
+                <label>Custom Color</label>
+                <div class="gradient-color-picker">
+                    <div class="saturation-lightness-picker" id="slPicker">
+                        <div class="sl-gradient" id="slGradient"></div>
+                        <div class="sl-cursor" id="slCursor"></div>
+                    </div>
+                    <div class="hue-slider-container">
+                        <div class="hue-slider" id="hueSlider">
+                            <div class="hue-cursor" id="hueCursor"></div>
+                        </div>
+                    </div>
+                </div>
+                <input type="text" id="customColorText" class="color-hex-input" value="#3B9797" onchange="selectCustomColor(this.value)" placeholder="#000000">
+            </div>
+        </div>
+    </div>
+
+    <!-- Memo Modal -->
+    <div id="memoModal" class="modal">
+        <div class="modal-content modal-memo">
+            <div class="modal-header">
+                <h2 id="memoModalTitle">Add Memo</h2>
+                <button class="close-btn" onclick="closeMemoModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="memo-editor">
+                    <div class="editor-toolbar">
+                        <button type="button" class="editor-btn" onclick="formatText('h1')" title="Heading 1">
+                            <strong>H1</strong>
+                        </button>
+                        <button type="button" class="editor-btn" onclick="formatText('h2')" title="Heading 2">
+                            <strong>H2</strong>
+                        </button>
+                        <div class="toolbar-divider"></div>
+                        <button type="button" class="editor-btn" onclick="formatText('bold')" title="Bold">
+                            <strong>B</strong>
+                        </button>
+                        <button type="button" class="editor-btn" onclick="formatText('italic')" title="Italic">
+                            <em>I</em>
+                        </button>
+                        <button type="button" class="editor-btn" onclick="formatText('underline')" title="Underline">
+                            <u>U</u>
+                        </button>
+                        <button type="button" class="editor-btn" onclick="formatText('strikeThrough')" title="Strikethrough">
+                            <s>S</s>
+                        </button>
+                        <div class="toolbar-divider"></div>
+                        <button type="button" class="editor-btn" onclick="formatText('insertUnorderedList')" title="Bullet List">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                        <button type="button" class="editor-btn" onclick="formatText('insertOrderedList')" title="Numbered List">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18M3 12h18M3 20h18" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="memoContent" class="editor-content" contenteditable="true" placeholder="Write your memo here..."></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeMemoModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="saveMemo()">Save Memo</button>
             </div>
         </div>
     </div>

@@ -1,0 +1,150 @@
+/* Relationship List View */
+.relationship-list-view {
+    display: none;
+}
+
+.relationship-list-view.active {
+    display: block;
+}
+
+.table-body.hide-columns .column-item,
+.table-body.hide-columns .column-item-editable {
+    display: none !important;
+}
+
+.relationship-list-header {
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border-bottom: 2px solid var(--border-color);
+    display: grid;
+    grid-template-columns: 2fr 2fr 80px 80px;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+}
+
+.relationship-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    display: grid;
+    grid-template-columns: 2fr 2fr 80px 80px;
+    gap: 10px;
+    align-items: center;
+    font-size: 13px;
+    transition: background 0.2s ease;
+}
+
+.relationship-item:hover {
+    background: #f8f9fa;
+}
+
+.relationship-item:last-child {
+    border-bottom: none;
+}
+
+.rel-column {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.fk-badge {
+    font-size: 9px;
+    font-weight: bold;
+    background: #ff6b6b;
+    color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+
+.rel-table {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.rel-color-indicator {
+    width: 50px;
+    height: 24px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.rel-controls {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.rel-control-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.rel-control-btn:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.rel-control-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+}
+
+.rel-control-btn.delete:hover {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+
+.add-relationship-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0 0 8px 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.add-relationship-btn:hover {
+    background: var(--primary-dark);
+}
+
+.add-relationship-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.no-relationships {
+    padding: 30px 15px;
+    text-align: center;
+    color: #999;
+    font-size: 13px;
+}
+
+/* Simplify drag and drop */
+.table-card.dragging {
+    cursor: grabbing;
+    z-index: 1000;
+}
