@@ -155,10 +155,9 @@ body {
     border-radius: 12px;
 }
 
-.developer-avatar {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+.developer-avatar img {
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -166,11 +165,7 @@ body {
     flex-shrink: 0;
 }
 
-.developer-avatar svg {
-    width: 45px;
-    height: 45px;
-    color: white;
-}
+
 
 .developer-details {
     flex: 1;

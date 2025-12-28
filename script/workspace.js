@@ -29,11 +29,104 @@ let minimapDragging = false;
 // Visibility toggles
 let tablesVisible = true;
 let relationshipsVisible = true;
+let memosVisible = true;
 
 // Feedback prompt variables
 let feedbackPromptInterval = null;
 const FEEDBACK_PROMPT_INTERVAL = 60 * 60 * 1000; // 1 hour in milliseconds
 const FEEDBACK_PROMPT_KEY = 'lastFeedbackPrompt';
+const INTRO_SHOWN_KEY = 'nexeraIntroShown';
+
+// Check if intro should be shown
+const checkAndShowIntro = () => {
+    const introShown = localStorage.getItem(INTRO_SHOWN_KEY);
+    
+    // Show intro if it's the first time
+    if (!introShown) {
+        // Wait a bit for the page to fully load
+        setTimeout(() => {
+            startIntroTour();
+        }, 500);
+    }
+};
+
+// Start the intro.js tour
+const startIntroTour = () => {
+    const intro = introJs();
+    
+    intro.setOptions({
+        steps: [
+            {
+                element: document.querySelector('.database-info'),
+                intro: "Welcome to Nexera! 🎉<br><br>This is your database workspace where you can visually design and organize your database schema. Let's take a quick tour of the features!",
+                position: 'bottom'
+            },
+            {
+                element: document.querySelector('[data-step="2"]'),
+                intro: "Click here to <strong>add tables</strong> to your database. Each table can have columns with data types, primary keys, and more.",
+                position: 'right'
+            },
+            {
+                element: document.querySelector('[data-step="3"]'),
+                intro: "Add <strong>sticky memos</strong> to your diagram to document important information, notes, or reminders about your database design.",
+                position: 'right'
+            },
+            {
+                element: document.querySelector('[data-step="4"]'),
+                intro: "The <strong>Tables tab</strong> shows all your tables. Click on any table to focus on it in the canvas.",
+                position: 'right'
+            },
+            {
+                element: document.querySelector('[data-step="5"]'),
+                intro: "The <strong>View tab</strong> lets you toggle visibility of tables, relationships, memos, and the minimap.",
+                position: 'right'
+            },
+            {
+                element: document.querySelector('[data-step="6"]'),
+                intro: "<strong>The Canvas</strong> is your main workspace.<br><br>• Drag tables and memos to arrange them<br>• Drag from a table header to create relationships<br>• Pan around by holding right-click or middle-mouse button<br>• Edit tables by clicking on their content",
+                position: 'top'
+            },
+            {
+                element: document.querySelector('[data-step="7"]'),
+                intro: "The <strong>minimap</strong> provides a bird's-eye view of your entire diagram. Click and drag to navigate quickly across large diagrams.",
+                position: 'left'
+            },
+            {
+                element: document.querySelector('[data-step="8"]'),
+                intro: "Don't forget to <strong>save your work</strong>! All data is stored in your browser's local storage, so you can come back anytime.",
+                position: 'bottom'
+            },
+            {
+                intro: "That's it! You're ready to start designing your database. 🚀<br><br>Have fun creating your database diagrams!<br><br><small>Tip: You can restart this tour anytime from the help menu.</small>"
+            }
+        ],
+        showProgress: true,
+        showBullets: false,
+        exitOnOverlayClick: false,
+        doneLabel: 'Get Started!',
+        nextLabel: 'Next →',
+        prevLabel: '← Back',
+        skipLabel: 'Skip Tour'
+    });
+    
+    intro.oncomplete(() => {
+        localStorage.setItem(INTRO_SHOWN_KEY, 'true');
+    });
+    
+    intro.onexit(() => {
+        localStorage.setItem(INTRO_SHOWN_KEY, 'true');
+    });
+    
+    intro.start();
+};
+
+// Restart intro tour (can be called from UI)
+const restartIntroTour = () => {
+    startIntroTour();
+};
+
+// Make globally accessible
+window.restartIntroTour = restartIntroTour;
 
 // Modal Utility for alerts and confirms
 const ModalUtility = {
@@ -473,6 +566,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCurrentDatabase();
     initializeCanvas();
     initializeFeedbackPrompt();
+    checkAndShowIntro();
 });
 
 // Initialize feedback prompt system
@@ -600,57 +694,122 @@ const renderTablesList = () => {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
                 <p>No tables yet</p>
-                <span>Create your first table</span>
+                <span>Click "Add Table" to get started</span>
             </div>
         `;
         return;
     }
     
-    tablesList.innerHTML = tables.map((table, index) => {
-        const relCount = relationships.filter(r => r.from === table.id || r.to === table.id).length;
+ /*    tablesList.innerHTML = tables.map((table, index) => {
+        const columnCount = table.columns ? table.columns.length : 0;
         return `
-        <div class="table-list-card" onclick="focusOnTable('${table.id}')">
-            <div class="table-card-header">
-                <div class="table-icon" style="background: linear-gradient(135deg, ${table.color} 0%, ${adjustColor(table.color, -15)} 100%);">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
+            <div class="table-list-item" data-table-id="${table.id}">
+                <div class="table-list-number">${index + 1}</div>
+                <div class="table-list-info">
+                    <div class="table-list-name">${table.name}</div>
+                    <div class="table-list-columns">${columnCount} column${columnCount !== 1 ? 's' : ''}</div>
                 </div>
-                <div class="table-card-info">
-                    <h4>${table.name}</h4>
-                    <div class="table-card-meta">
-                        <span class="meta-badge">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            ${table.columns.length}
-                        </span>
-                        ${relCount > 0 ? `
-                        <span class="meta-badge">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                            </svg>
-                            ${relCount}
-                        </span>` : ''}
-                    </div>
-                </div>
-            </div>
-            <div class="table-card-actions">
-                <button class="table-action-btn" onclick="focusOnTable('${table.id}'); event.stopPropagation();" title="Focus">
+                <button class="table-list-eye" onclick="focusOnTable('${table.id}')" title="Focus on table">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                 </button>
-                <button class="table-action-btn" onclick="editTableName('${table.id}'); event.stopPropagation();" title="Edit">
+            </div>
+        `;
+    }).join('');
+
+        if (tables.length === 0) {
+        tablesList.innerHTML = '<div style="padding: 10px; text-align: center; color: var(--text-muted); font-size: 12px;">No tables yet</div>';
+        return;
+    } */
+    
+    tablesList.innerHTML = tables.map(table => `
+        <div class="table-list-item" onclick="focusOnTable('${table.id}')">
+            <div class="table-color-indicator" style="background: ${table.color};"></div>
+            <div class="table-list-info">
+                <div class="table-list-name">${table.name}</div>
+                <div class="table-list-columns">${table.columns.length} ${table.columns.length === 1 ? 'column' : 'columns'}</div>
+            </div>
+            <button class="table-list-focus-btn" onclick="focusOnTable('${table.id}'); event.stopPropagation();" title="Focus on table">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+            </button>
+        </div>
+    `).join('');
+};
+
+// Render memos list in sidebar
+const renderMemosList = () => {
+    const memosList = document.getElementById('memosList');
+    if (!memosList) return;
+    
+    if (memos.length === 0) {
+        memosList.innerHTML = `
+            <div class="tables-empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                <p>No memos yet</p>
+                <span>Click "Add Memo" to get started</span>
+            </div>
+        `;
+        return;
+    }
+    
+    memosList.innerHTML = memos.map((memo, index) => {
+        const contentPreview = memo.content.replace(/<[^>]*>/g, '').substring(0, 50);
+        return `
+            <div class="table-list-item" data-memo-id="${memo.id}">
+                <div class="table-list-number">${index + 1}</div>
+                <div class="table-list-info">
+                    <div class="table-list-name">Memo ${index + 1}</div>
+                    <div class="table-list-columns">${contentPreview}${contentPreview.length >= 50 ? '...' : ''}</div>
+                </div>
+                <button class="table-list-eye" onclick="focusOnMemo('${memo.id}')" title="Focus on memo">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                 </button>
             </div>
-        </div>
-    `;
+        `;
     }).join('');
+};
+
+// Focus camera on specific memo
+const focusOnMemo = (memoId) => {
+    const memo = memos.find(m => m.id === memoId);
+    if (!memo) return;
+    
+    const canvas = document.getElementById('canvas');
+    const container = canvas.parentElement;
+    const memoElement = document.getElementById(`memo-${memoId}`);
+    
+    if (!memoElement) return;
+    
+    // Calculate position to center the memo in viewport
+    const memoLeft = memo.position.x;
+    const memoTop = memo.position.y;
+    
+    // Calculate center position
+    const targetScrollLeft = memoLeft - (container.clientWidth / 2) + (memo.size.width / 2);
+    const targetScrollTop = memoTop - (container.clientHeight / 2) + (memo.size.height / 2);
+    
+    // Smooth scroll to position
+    container.scrollTo({
+        left: targetScrollLeft,
+        top: targetScrollTop,
+        behavior: 'smooth'
+    });
+    
+    // Highlight the memo briefly
+    memoElement.style.boxShadow = '0 0 0 3px var(--primary-color)';
+    setTimeout(() => {
+        memoElement.style.boxShadow = '';
+    }, 1000);
 };
 
 // Switch between tabs in sidebar
@@ -947,6 +1106,7 @@ const renderTables = () => {
     });
     
     renderRelationships();
+    renderMemos();
     
     // Update minimap when tables are rendered
     if (minimapVisible) {
@@ -2430,6 +2590,7 @@ const stopMemoDrag = () => {
         memo.position.x = parseInt(memoElement.style.left);
         memo.position.y = parseInt(memoElement.style.top);
         saveWorkspace();
+        renderMinimap();
     }
     
     draggedMemo = null;
@@ -2475,6 +2636,7 @@ const stopMemoResize = () => {
         memo.size.width = memoElement.offsetWidth;
         memo.size.height = memoElement.offsetHeight;
         saveWorkspace();
+        renderMinimap();
     }
     
     resizingMemo = null;
@@ -2854,6 +3016,21 @@ const toggleRelationshipsVisibility = () => {
     }
 };
 
+// Toggle memos visibility
+const toggleMemosVisibility = () => {
+    memosVisible = !memosVisible;
+    const canvas = document.getElementById('canvas');
+    const memosBtn = document.getElementById('memosToggleBtn');
+    
+    if (memosVisible) {
+        canvas.classList.remove('hide-memos');
+        memosBtn?.classList.add('active');
+    } else {
+        canvas.classList.add('hide-memos');
+        memosBtn?.classList.remove('active');
+    }
+};
+
 const renderMinimap = () => {
     const canvas = document.getElementById('canvas');
     const minimapCanvas = document.getElementById('minimapCanvas');
@@ -2909,6 +3086,20 @@ const renderMinimap = () => {
             );
             ctx.stroke();
         }
+    });
+    
+    // Draw memos
+    memos.forEach(memo => {
+        const x = memo.position.x * scale;
+        const y = memo.position.y * scale;
+        const width = memo.size.width * scale;
+        const height = memo.size.height * scale;
+        
+        ctx.fillStyle = memo.color || '#FFF9C4';
+        ctx.fillRect(x, y, width, height);
+        ctx.strokeStyle = '#E0E0E0';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, width, height);
     });
 };
 
