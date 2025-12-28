@@ -30,6 +30,11 @@ let minimapDragging = false;
 let tablesVisible = true;
 let relationshipsVisible = true;
 
+// Feedback prompt variables
+let feedbackPromptInterval = null;
+const FEEDBACK_PROMPT_INTERVAL = 60 * 60 * 1000; // 1 hour in milliseconds
+const FEEDBACK_PROMPT_KEY = 'lastFeedbackPrompt';
+
 // Modal Utility for alerts and confirms
 const ModalUtility = {
     modal: null,
@@ -467,7 +472,78 @@ document.addEventListener('DOMContentLoaded', () => {
     ColorPickerUtility.init();
     loadCurrentDatabase();
     initializeCanvas();
+    initializeFeedbackPrompt();
 });
+
+// Initialize feedback prompt system
+const initializeFeedbackPrompt = () => {
+    // Check if we should show the prompt on load
+    checkAndShowFeedbackPrompt();
+    
+    // Set up interval to check every hour
+    feedbackPromptInterval = setInterval(checkAndShowFeedbackPrompt, FEEDBACK_PROMPT_INTERVAL);
+};
+
+// Check if it's time to show feedback prompt
+const checkAndShowFeedbackPrompt = () => {
+    const lastPrompt = localStorage.getItem(FEEDBACK_PROMPT_KEY);
+    const now = Date.now();
+    
+    // Show prompt if never shown or if more than 1 hour has passed
+    if (!lastPrompt || (now - parseInt(lastPrompt)) >= FEEDBACK_PROMPT_INTERVAL) {
+        showFeedbackPrompt();
+        localStorage.setItem(FEEDBACK_PROMPT_KEY, now.toString());
+    }
+};
+
+// Show feedback prompt modal
+const showFeedbackPrompt = () => {
+    ModalUtility.confirm(
+        'Share Your Feedback',
+        `
+        <div style="text-align: center; padding: 20px 0;">
+            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="white" style="width: 32px; height: 32px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+            </div>
+            <p style="font-size: 16px; color: var(--text-dark); margin-bottom: 10px; line-height: 1.6;">
+                We'd love to hear your thoughts on Nexera!
+            </p>
+            <p style="font-size: 14px; color: var(--text-muted); margin: 0;">
+                Your feedback helps us improve and create a better experience for everyone.
+            </p>
+        </div>
+        `,
+        () => {
+            // User clicked "Give Feedback"
+            window.open('feedback.html', '_blank');
+        },
+        () => {
+            // User clicked "Maybe Later"
+            // Do nothing, prompt will show again in an hour
+        }
+    );
+    
+    // Customize button text
+    const modalFooter = document.getElementById('utilityModalFooter');
+    if (modalFooter) {
+        modalFooter.innerHTML = `
+            <button class="btn-secondary" onclick="ModalUtility.handleConfirm(false)" style="flex: 1;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 18px; height: 18px; margin-right: 6px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Maybe Later
+            </button>
+            <button class="btn-primary" onclick="ModalUtility.handleConfirm(true)" style="flex: 1;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 18px; height: 18px; margin-right: 6px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                </svg>
+                Give Feedback
+            </button>
+        `;
+    }
+};
 
 // Load the current database from localStorage
 const loadCurrentDatabase = () => {
@@ -518,25 +594,63 @@ const renderTablesList = () => {
     if (!tablesList) return;
     
     if (tables.length === 0) {
-        tablesList.innerHTML = '<div style="padding: 10px; text-align: center; color: var(--text-muted); font-size: 12px;">No tables yet</div>';
+        tablesList.innerHTML = `
+            <div class="tables-empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <p>No tables yet</p>
+                <span>Create your first table</span>
+            </div>
+        `;
         return;
     }
     
-    tablesList.innerHTML = tables.map(table => `
-        <div class="table-list-item" onclick="focusOnTable('${table.id}')">
-            <div class="table-color-indicator" style="background: ${table.color};"></div>
-            <div class="table-list-info">
-                <div class="table-list-name">${table.name}</div>
-                <div class="table-list-columns">${table.columns.length} ${table.columns.length === 1 ? 'column' : 'columns'}</div>
+    tablesList.innerHTML = tables.map((table, index) => {
+        const relCount = relationships.filter(r => r.from === table.id || r.to === table.id).length;
+        return `
+        <div class="table-list-card" onclick="focusOnTable('${table.id}')">
+            <div class="table-card-header">
+                <div class="table-icon" style="background: linear-gradient(135deg, ${table.color} 0%, ${adjustColor(table.color, -15)} 100%);">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div class="table-card-info">
+                    <h4>${table.name}</h4>
+                    <div class="table-card-meta">
+                        <span class="meta-badge">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            ${table.columns.length}
+                        </span>
+                        ${relCount > 0 ? `
+                        <span class="meta-badge">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                            ${relCount}
+                        </span>` : ''}
+                    </div>
+                </div>
             </div>
-            <button class="table-list-focus-btn" onclick="focusOnTable('${table.id}'); event.stopPropagation();" title="Focus on table">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-            </button>
+            <div class="table-card-actions">
+                <button class="table-action-btn" onclick="focusOnTable('${table.id}'); event.stopPropagation();" title="Focus">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                </button>
+                <button class="table-action-btn" onclick="editTableName('${table.id}'); event.stopPropagation();" title="Edit">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                </button>
+            </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 };
 
 // Switch between tabs in sidebar
